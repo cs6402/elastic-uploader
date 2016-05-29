@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -27,7 +29,7 @@ public class MainUploader implements Runnable {
 	@Resource(name = "lockService")
 	private RedisLockService lockService;
 
-	@Value("${uploader_tag_max_bytes_length}")
+	@Value("${uploader_max_bytes_length}")
 	private long maxBytesLength;
 
 	/**
@@ -42,17 +44,21 @@ public class MainUploader implements Runnable {
 
 	private List<String> allDocumentsInBytes;
 
-	@Value("${uploader_tag_a_round_time_limit}")
+	@Value("${uploader_execution_timeout}")
 	private long timeLimlt;
 
 	@Resource(name = "elasticSearchService")
 	private SearchService search;
 
+	private ExecutorService threadPool;
+	
 	@PostConstruct
 	public void init() {
 		try {
 			emptyUploadContentLength = "[]".getBytes("UTF-8").length;
 			allDocumentsInBytes = new LinkedList<String>();
+			threadPool = Executors.newSingleThreadExecutor();
+			threadPool.submit(this);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

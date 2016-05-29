@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import com.tdsoft.uploader.entity.User;
 import com.tdsoft.uploader.util.JsonUtils;
 
-@Service("userCacheImpl")
+@Service("userCache")
 public class UserCache extends AbstractCacheService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserCache.class);
@@ -53,24 +53,14 @@ public class UserCache extends AbstractCacheService {
 			return Collections.emptyList();
 		}
 		
-		// concat UserId, e.g UserId:abc12345, after concat, would be "user:abc12345"
 		Iterator<TypedTuple<String>> iterator = userIdSet.iterator();
-		List<String> userIdList = new ArrayList<String>(userIdSet.size());
-		List<Double> scoreList = new ArrayList<Double>(userIdSet.size());
+		List<SimpleEntry<Double, String>> contentWithLatestScore = new ArrayList<SimpleEntry<Double, String>>(userIdSet.size());
 		while (iterator.hasNext()) {
-			TypedTuple<String> userIdWithScore = iterator.next();
-			String userId = appendPrefix(userContentKey, userIdWithScore.getValue());
-			userIdList.add(userId);
-			scoreList.add(userIdWithScore.getScore());
-		}
-
-		// use multiGet to retrieve user content
-		List<String> content = redisClient.opsForValue().multiGet(userIdList);
-		List<SimpleEntry<Double, String>> contentWithLatestScore = new ArrayList<SimpleEntry<Double, String>>(content.size());
-		for (int i = 0; i < content.size(); i++) {
-			SimpleEntry<Double, String> entry = new SimpleEntry<Double, String>(scoreList.get(i), content.get(i));
+			TypedTuple<String> userContentWithScore = iterator.next();
+			SimpleEntry<Double, String> entry = new SimpleEntry<Double, String>(userContentWithScore.getScore(), userContentWithScore.getValue());
 			contentWithLatestScore.add(entry);
 		}
+
 		return contentWithLatestScore;
 	}
 

@@ -55,7 +55,7 @@ public class ElasticSearchService implements SearchService {
 		}
 		BulkResponse response = bulkBuilder.execute().actionGet();
 		if (response.hasFailures()) {
-			logger.error("Post Tag Error Respone : {}", response.buildFailureMessage());
+			logger.error("Post User Error Respone : {}", response.buildFailureMessage());
 		}
 	}
 

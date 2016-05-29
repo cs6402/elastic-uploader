@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-
+import org.springframework.stereotype.Service;
+@Service("lockService")
 public class RedisLockService {
 	private static final Logger logger = LoggerFactory.getLogger(RedisLockService.class);
 
